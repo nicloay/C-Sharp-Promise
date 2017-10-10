@@ -1,4 +1,4 @@
-﻿namespace RSG
+﻿namespace RSG.Promises.Generic
 {
     /// <summary>
     /// Interface for a promise that can be rejected or resolved.

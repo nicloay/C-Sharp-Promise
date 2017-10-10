@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RSG
+namespace RSG.Promises
 {
     /// <summary>
     /// Interface for a promise that can be rejected.

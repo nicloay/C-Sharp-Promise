@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using RSG.Promises.Generic;
 using Xunit;
 
 namespace RSG.Tests

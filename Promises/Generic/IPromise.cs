@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using RSG.Promises;
 
-namespace RSG
+namespace RSG.Promises.Generic
 {
     /// <summary>
     /// Implements a C# promise.
     /// https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
     /// </summary>
-    public interface IPromise<PromisedT>
+    public interface IPromise<TPromised>
     {
         /// <summary>
         /// Gets the id of the promise, useful for referencing the promise during runtime.
@@ -18,21 +18,21 @@ namespace RSG
         /// <summary>
         /// Set the name of the promise, useful for debugging.
         /// </summary>
-        IPromise<PromisedT> WithName(string name);
+        IPromise<TPromised> WithName(string name);
 
         /// <summary>
         /// Completes the promise. 
         /// onResolved is called on successful completion.
         /// onRejected is called on error.
         /// </summary>
-        void Done(Action<PromisedT> onResolved, Action<Exception> onRejected);
+        void Done(Action<TPromised> onResolved, Action<Exception> onRejected);
 
         /// <summary>
         /// Completes the promise. 
         /// onResolved is called on successful completion.
         /// Adds a default error handler.
         /// </summary>
-        void Done(Action<PromisedT> onResolved);
+        void Done(Action<TPromised> onResolved);
 
         /// <summary>
         /// Complete the promise. Adds a default error handler.
@@ -42,52 +42,52 @@ namespace RSG
         /// <summary>
         /// Handle errors for the promise. 
         /// </summary>
-        IPromise<PromisedT> Catch(Action<Exception> onRejected);
+        IPromise<TPromised> Catch(Action<Exception> onRejected);
 
         /// <summary>
         /// Add a resolved callback that chains a value promise (optionally converting to a different value type).
         /// </summary>
-        IPromise<ConvertedT> Then<ConvertedT>(Func<PromisedT, IPromise<ConvertedT>> onResolved);
+        IPromise<T> Then<T>(Func<TPromised, IPromise<T>> onResolved);
 
         /// <summary>
         /// Add a resolved callback that chains a non-value promise.
         /// </summary>
-        IPromise Then(Func<PromisedT, IPromise> onResolved);
+        IPromise Then(Func<TPromised, IPromise> onResolved);
 
         /// <summary>
         /// Add a resolved callback.
         /// </summary>
-        IPromise<PromisedT> Then(Action<PromisedT> onResolved);
+        IPromise<TPromised> Then(Action<TPromised> onResolved);
 
         /// <summary>
         /// Add a resolved callback and a rejected callback.
         /// The resolved callback chains a value promise (optionally converting to a different value type).
         /// </summary>
-        IPromise<ConvertedT> Then<ConvertedT>(Func<PromisedT, IPromise<ConvertedT>> onResolved, Action<Exception> onRejected);
+        IPromise<T> Then<T>(Func<TPromised, IPromise<T>> onResolved, Action<Exception> onRejected);
 
         /// <summary>
         /// Add a resolved callback and a rejected callback.
         /// The resolved callback chains a non-value promise.
         /// </summary>
-        IPromise Then(Func<PromisedT, IPromise> onResolved, Action<Exception> onRejected);
+        IPromise Then(Func<TPromised, IPromise> onResolved, Action<Exception> onRejected);
 
         /// <summary>
         /// Add a resolved callback and a rejected callback.
         /// </summary>
-        IPromise<PromisedT> Then(Action<PromisedT> onResolved, Action<Exception> onRejected);
+        IPromise<TPromised> Then(Action<TPromised> onResolved, Action<Exception> onRejected);
 
         /// <summary>
         /// Return a new promise with a different value.
         /// May also change the type of the value.
         /// </summary>
-        IPromise<ConvertedT> Then<ConvertedT>(Func<PromisedT, ConvertedT> transform);
+        IPromise<T> Then<T>(Func<TPromised, T> transform);
 
         /// <summary>
         /// Return a new promise with a different value.
         /// May also change the type of the value.
         /// </summary>
         [Obsolete("Use Then instead")]
-        IPromise<ConvertedT> Transform<ConvertedT>(Func<PromisedT, ConvertedT> transform);
+        IPromise<T> Transform<T>(Func<TPromised, T> transform);
 
         /// <summary>
         /// Chain an enumerable of promises, all of which must resolve.
@@ -95,7 +95,7 @@ namespace RSG
         /// The resulting promise is resolved when all of the promises have resolved.
         /// It is rejected as soon as any of the promises have been rejected.
         /// </summary>
-        IPromise<IEnumerable<ConvertedT>> ThenAll<ConvertedT>(Func<PromisedT, IEnumerable<IPromise<ConvertedT>>> chain);
+        IPromise<IEnumerable<ConvertedT>> ThenAll<ConvertedT>(Func<TPromised, IEnumerable<IPromise<ConvertedT>>> chain);
 
         /// <summary>
         /// Chain an enumerable of promises, all of which must resolve.
@@ -103,14 +103,14 @@ namespace RSG
         /// The resulting promise is resolved when all of the promises have resolved.
         /// It is rejected as soon as any of the promises have been rejected.
         /// </summary>
-        IPromise ThenAll(Func<PromisedT, IEnumerable<IPromise>> chain);
+        IPromise ThenAll(Func<TPromised, IEnumerable<IPromise>> chain);
 
         /// <summary>
         /// Takes a function that yields an enumerable of promises.
         /// Returns a promise that resolves when the first of the promises has resolved.
         /// Yields the value from the first promise that has resolved.
         /// </summary>
-        IPromise<ConvertedT> ThenRace<ConvertedT>(Func<PromisedT, IEnumerable<IPromise<ConvertedT>>> chain);
+        IPromise<ConvertedT> ThenRace<ConvertedT>(Func<TPromised, IEnumerable<IPromise<ConvertedT>>> chain);
 
         /// <summary>
         /// Takes a function that yields an enumerable of promises.
@@ -118,7 +118,7 @@ namespace RSG
         /// Returns a promise that resolves when the first of the promises has resolved.
         /// Yields the value from the first promise that has resolved.
         /// </summary>
-        IPromise ThenRace(Func<PromisedT, IEnumerable<IPromise>> chain);
+        IPromise ThenRace(Func<TPromised, IEnumerable<IPromise>> chain);
 
         /// <summary> 
         /// Add a finally callback. 

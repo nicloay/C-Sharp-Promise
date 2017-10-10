@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using RSG.Promises.Generic;
 
 namespace RSG.Promises
 {
@@ -367,6 +368,7 @@ namespace RSG.Promises
             return Then(onResolved, null);
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// Add a resolved callback that chains a non-value promise.
         /// </summary>

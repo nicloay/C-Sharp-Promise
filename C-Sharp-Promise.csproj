@@ -47,7 +47,7 @@
     <Compile Include="PromiseHelpers.cs" />
     <Compile Include="Promises\Generic\IPendingPromise.cs" />
     <Compile Include="Promises\Generic\IPromise.cs" />
-    <Compile Include="Promises\Generic\IRejectable.cs" />
+    <Compile Include="Promises\IRejectable.cs" />
     <Compile Include="Promises\PromiseState.cs" />
     <Compile Include="PromiseTimer.cs" />
     <Compile Include="Promises\ExceptionEventArgs.cs" />

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using RSG.Promises.Generic;
 
 namespace RSG.Promises
 {

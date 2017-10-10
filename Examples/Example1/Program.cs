@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
+using RSG.Promises.Generic;
 
 //
 // Example of downloading text from a URL using a promise.
