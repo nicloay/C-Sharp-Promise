@@ -10,7 +10,7 @@ namespace RSG
     /// Implements a C# promise.
     /// https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
     /// </summary>
-    public class Promise<PromisedT> : IPromise<PromisedT>, IPendingPromise<PromisedT>, IPromiseInfo
+    public class Promise<TPromised> : IPromise<TPromised>, IPendingPromise<TPromised>, IPromiseInfo
     {
         /// <summary>
         /// The exception when the promise is rejected.
@@ -20,7 +20,7 @@ namespace RSG
         /// <summary>
         /// The value when the promises is resolved.
         /// </summary>
-        private PromisedT resolveValue;
+        private TPromised resolveValue;
 
         /// <summary>
         /// Error handler.
@@ -30,7 +30,7 @@ namespace RSG
         /// <summary>
         /// Completed handlers that accept a value.
         /// </summary>
-        private List<Action<PromisedT>> resolveCallbacks;
+        private List<Action<TPromised>> resolveCallbacks;
         private List<IRejectable> resolveRejectables;
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace RSG
             }
         }
 
-        public Promise(Action<Action<PromisedT>, Action<Exception>> resolver)
+        public Promise(Action<Action<TPromised>, Action<Exception>> resolver)
         {
             this.CurState = PromiseState.Pending;
             this.Id = Promise.NextId();
@@ -101,11 +101,11 @@ namespace RSG
         /// <summary>
         /// Add a resolve handler for this promise.
         /// </summary>
-        private void AddResolveHandler(Action<PromisedT> onResolved, IRejectable rejectable)
+        private void AddResolveHandler(Action<TPromised> onResolved, IRejectable rejectable)
         {
             if (resolveCallbacks == null)
             {
-                resolveCallbacks = new List<Action<PromisedT>>();
+                resolveCallbacks = new List<Action<TPromised>>();
             }
 
             if (resolveRejectables == null)
@@ -163,7 +163,7 @@ namespace RSG
         /// <summary>
         /// Invoke all resolve handlers.
         /// </summary>
-        private void InvokeResolveHandlers(PromisedT value)
+        private void InvokeResolveHandlers(TPromised value)
         {
             if (resolveCallbacks != null)
             {
@@ -201,7 +201,7 @@ namespace RSG
         /// <summary>
         /// Resolve the promise with a particular value.
         /// </summary>
-        public void Resolve(PromisedT value)
+        public void Resolve(TPromised value)
         {
             if (CurState != PromiseState.Pending)
             {
@@ -224,7 +224,7 @@ namespace RSG
         /// onResolved is called on successful completion.
         /// onRejected is called on error.
         /// </summary>
-        public void Done(Action<PromisedT> onResolved, Action<Exception> onRejected)
+        public void Done(Action<TPromised> onResolved, Action<Exception> onRejected)
         {
             Then(onResolved, onRejected)
                 .Catch(ex =>
@@ -237,7 +237,7 @@ namespace RSG
         /// onResolved is called on successful completion.
         /// Adds a default error handler.
         /// </summary>
-        public void Done(Action<PromisedT> onResolved)
+        public void Done(Action<TPromised> onResolved)
         {
             Then(onResolved)
                 .Catch(ex =>
@@ -258,7 +258,7 @@ namespace RSG
         /// <summary>
         /// Set the name of the promise, useful for debugging.
         /// </summary>
-        public IPromise<PromisedT> WithName(string name)
+        public IPromise<TPromised> WithName(string name)
         {
             this.Name = name;
             return this;
@@ -267,14 +267,14 @@ namespace RSG
         /// <summary>
         /// Handle errors for the promise. 
         /// </summary>
-        public IPromise<PromisedT> Catch(Action<Exception> onRejected)
+        public IPromise<TPromised> Catch(Action<Exception> onRejected)
         {
 //            Argument.NotNull(() => onRejected);
 
-            var resultPromise = new Promise<PromisedT>();
+            var resultPromise = new Promise<TPromised>();
             resultPromise.WithName(Name);
 
-            Action<PromisedT> resolveHandler = v =>
+            Action<TPromised> resolveHandler = v =>
             {
                 resultPromise.Resolve(v);
             };
@@ -294,7 +294,7 @@ namespace RSG
         /// <summary>
         /// Add a resolved callback that chains a value promise (optionally converting to a different value type).
         /// </summary>
-        public IPromise<ConvertedT> Then<ConvertedT>(Func<PromisedT, IPromise<ConvertedT>> onResolved)
+        public IPromise<ConvertedT> Then<ConvertedT>(Func<TPromised, IPromise<ConvertedT>> onResolved)
         {
             return Then(onResolved, null);
         }
@@ -302,7 +302,7 @@ namespace RSG
         /// <summary>
         /// Add a resolved callback that chains a non-value promise.
         /// </summary>
-        public IPromise Then(Func<PromisedT, IPromise> onResolved)
+        public IPromise Then(Func<TPromised, IPromise> onResolved)
         {
             return Then(onResolved, null);
         }
@@ -310,7 +310,7 @@ namespace RSG
         /// <summary>
         /// Add a resolved callback.
         /// </summary>
-        public IPromise<PromisedT> Then(Action<PromisedT> onResolved)
+        public IPromise<TPromised> Then(Action<TPromised> onResolved)
         {
             return Then(onResolved, null);
         }
@@ -319,7 +319,7 @@ namespace RSG
         /// Add a resolved callback and a rejected callback.
         /// The resolved callback chains a value promise (optionally converting to a different value type).
         /// </summary>
-        public IPromise<ConvertedT> Then<ConvertedT>(Func<PromisedT, IPromise<ConvertedT>> onResolved, Action<Exception> onRejected)
+        public IPromise<ConvertedT> Then<ConvertedT>(Func<TPromised, IPromise<ConvertedT>> onResolved, Action<Exception> onRejected)
         {
             // This version of the function must supply an onResolved.
             // Otherwise there is now way to get the converted value to pass to the resulting promise.
@@ -328,7 +328,7 @@ namespace RSG
             var resultPromise = new Promise<ConvertedT>();
             resultPromise.WithName(Name);
 
-            Action<PromisedT> resolveHandler = v =>
+            Action<TPromised> resolveHandler = v =>
             {
                 onResolved(v)
                     .Then(
@@ -357,12 +357,12 @@ namespace RSG
         /// Add a resolved callback and a rejected callback.
         /// The resolved callback chains a non-value promise.
         /// </summary>
-        public IPromise Then(Func<PromisedT, IPromise> onResolved, Action<Exception> onRejected)
+        public IPromise Then(Func<TPromised, IPromise> onResolved, Action<Exception> onRejected)
         {
             var resultPromise = new Promise();
             resultPromise.WithName(Name);
 
-            Action<PromisedT> resolveHandler = v =>
+            Action<TPromised> resolveHandler = v =>
             {
                 if (onResolved != null)
                 {
@@ -396,12 +396,12 @@ namespace RSG
         /// <summary>
         /// Add a resolved callback and a rejected callback.
         /// </summary>
-        public IPromise<PromisedT> Then(Action<PromisedT> onResolved, Action<Exception> onRejected)
+        public IPromise<TPromised> Then(Action<TPromised> onResolved, Action<Exception> onRejected)
         {
-            var resultPromise = new Promise<PromisedT>();
+            var resultPromise = new Promise<TPromised>();
             resultPromise.WithName(Name);
 
-            Action<PromisedT> resolveHandler = v =>
+            Action<TPromised> resolveHandler = v =>
             {
                 if (onResolved != null)
                 {
@@ -430,7 +430,7 @@ namespace RSG
         /// Return a new promise with a different value.
         /// May also change the type of the value.
         /// </summary>
-        public IPromise<ConvertedT> Then<ConvertedT>(Func<PromisedT, ConvertedT> transform)
+        public IPromise<ConvertedT> Then<ConvertedT>(Func<TPromised, ConvertedT> transform)
         {
 //            Argument.NotNull(() => transform);
             return Then(value => Promise<ConvertedT>.Resolved(transform(value)));
@@ -441,7 +441,7 @@ namespace RSG
         /// May also change the type of the value.
         /// </summary>
         [Obsolete("Use Then instead")]
-        public IPromise<ConvertedT> Transform<ConvertedT>(Func<PromisedT, ConvertedT> transform)
+        public IPromise<ConvertedT> Transform<ConvertedT>(Func<TPromised, ConvertedT> transform)
         {
 //            Argument.NotNull(() => transform);
             return Then(value => Promise<ConvertedT>.Resolved(transform(value)));
@@ -450,7 +450,7 @@ namespace RSG
         /// <summary>
         /// Helper function to invoke or register resolve/reject handlers.
         /// </summary>
-        private void ActionHandlers(IRejectable resultPromise, Action<PromisedT> resolveHandler, Action<Exception> rejectHandler)
+        private void ActionHandlers(IRejectable resultPromise, Action<TPromised> resolveHandler, Action<Exception> rejectHandler)
         {
             if (CurState == PromiseState.Resolved)
             {
@@ -473,7 +473,7 @@ namespace RSG
         /// The resulting promise is resolved when all of the promises have resolved.
         /// It is rejected as soon as any of the promises have been rejected.
         /// </summary>
-        public IPromise<IEnumerable<ConvertedT>> ThenAll<ConvertedT>(Func<PromisedT, IEnumerable<IPromise<ConvertedT>>> chain)
+        public IPromise<IEnumerable<ConvertedT>> ThenAll<ConvertedT>(Func<TPromised, IEnumerable<IPromise<ConvertedT>>> chain)
         {
             return Then(value => Promise<ConvertedT>.All(chain(value)));
         }
@@ -484,7 +484,7 @@ namespace RSG
         /// The resulting promise is resolved when all of the promises have resolved.
         /// It is rejected as soon as any of the promises have been rejected.
         /// </summary>
-        public IPromise ThenAll(Func<PromisedT, IEnumerable<IPromise>> chain)
+        public IPromise ThenAll(Func<TPromised, IEnumerable<IPromise>> chain)
         {
             return Then(value => Promise.All(chain(value)));
         }
@@ -493,26 +493,26 @@ namespace RSG
         /// Returns a promise that resolves when all of the promises in the enumerable argument have resolved.
         /// Returns a promise of a collection of the resolved results.
         /// </summary>
-        public static IPromise<IEnumerable<PromisedT>> All(params IPromise<PromisedT>[] promises)
+        public static IPromise<IEnumerable<TPromised>> All(params IPromise<TPromised>[] promises)
         {
-            return All((IEnumerable<IPromise<PromisedT>>)promises); // Cast is required to force use of the other All function.
+            return All((IEnumerable<IPromise<TPromised>>)promises); // Cast is required to force use of the other All function.
         }
 
         /// <summary>
         /// Returns a promise that resolves when all of the promises in the enumerable argument have resolved.
         /// Returns a promise of a collection of the resolved results.
         /// </summary>
-        public static IPromise<IEnumerable<PromisedT>> All(IEnumerable<IPromise<PromisedT>> promises)
+        public static IPromise<IEnumerable<TPromised>> All(IEnumerable<IPromise<TPromised>> promises)
         {
             var promisesArray = promises.ToArray();
             if (promisesArray.Length == 0)
             {
-                return Promise<IEnumerable<PromisedT>>.Resolved(EnumerableExt.Empty<PromisedT>());
+                return Promise<IEnumerable<TPromised>>.Resolved(EnumerableExt.Empty<TPromised>());
             }
 
             var remainingCount = promisesArray.Length;
-            var results = new PromisedT[remainingCount];
-            var resultPromise = new Promise<IEnumerable<PromisedT>>();
+            var results = new TPromised[remainingCount];
+            var resultPromise = new Promise<IEnumerable<TPromised>>();
             resultPromise.WithName("All");
 
             promisesArray.Each((promise, index) =>
@@ -548,7 +548,7 @@ namespace RSG
         /// Returns a promise that resolves when the first of the promises has resolved.
         /// Yields the value from the first promise that has resolved.
         /// </summary>
-        public IPromise<ConvertedT> ThenRace<ConvertedT>(Func<PromisedT, IEnumerable<IPromise<ConvertedT>>> chain)
+        public IPromise<ConvertedT> ThenRace<ConvertedT>(Func<TPromised, IEnumerable<IPromise<ConvertedT>>> chain)
         {
             return Then(value => Promise<ConvertedT>.Race(chain(value)));
         }
@@ -559,7 +559,7 @@ namespace RSG
         /// Returns a promise that resolves when the first of the promises has resolved.
         /// Yields the value from the first promise that has resolved.
         /// </summary>
-        public IPromise ThenRace(Func<PromisedT, IEnumerable<IPromise>> chain)
+        public IPromise ThenRace(Func<TPromised, IEnumerable<IPromise>> chain)
         {
             return Then(value => Promise.Race(chain(value)));
         }
@@ -568,16 +568,16 @@ namespace RSG
         /// Returns a promise that resolves when the first of the promises in the enumerable argument have resolved.
         /// Returns the value from the first promise that has resolved.
         /// </summary>
-        public static IPromise<PromisedT> Race(params IPromise<PromisedT>[] promises)
+        public static IPromise<TPromised> Race(params IPromise<TPromised>[] promises)
         {
-            return Race((IEnumerable<IPromise<PromisedT>>)promises); // Cast is required to force use of the other function.
+            return Race((IEnumerable<IPromise<TPromised>>)promises); // Cast is required to force use of the other function.
         }
 
         /// <summary>
         /// Returns a promise that resolves when the first of the promises in the enumerable argument have resolved.
         /// Returns the value from the first promise that has resolved.
         /// </summary>
-        public static IPromise<PromisedT> Race(IEnumerable<IPromise<PromisedT>> promises)
+        public static IPromise<TPromised> Race(IEnumerable<IPromise<TPromised>> promises)
         {
             var promisesArray = promises.ToArray();
             if (promisesArray.Length == 0)
@@ -585,7 +585,7 @@ namespace RSG
                 throw new ApplicationException("At least 1 input promise must be provided for Race");
             }
 
-            var resultPromise = new Promise<PromisedT>();
+            var resultPromise = new Promise<TPromised>();
             resultPromise.WithName("Race");
 
             promisesArray.Each((promise, index) =>
@@ -615,9 +615,9 @@ namespace RSG
         /// <summary>
         /// Convert a simple value directly into a resolved promise.
         /// </summary>
-        public static IPromise<PromisedT> Resolved(PromisedT promisedValue)
+        public static IPromise<TPromised> Resolved(TPromised promisedValue)
         {
-            var promise = new Promise<PromisedT>();
+            var promise = new Promise<TPromised>();
             promise.Resolve(promisedValue);
             return promise;
         }
@@ -625,11 +625,11 @@ namespace RSG
         /// <summary>
         /// Convert an exception directly into a rejected promise.
         /// </summary>
-        public static IPromise<PromisedT> Rejected(Exception ex)
+        public static IPromise<TPromised> Rejected(Exception ex)
         {
 //            Argument.NotNull(() => ex);
 
-            var promise = new Promise<PromisedT>();
+            var promise = new Promise<TPromised>();
             promise.Reject(ex);
             return promise;
         }

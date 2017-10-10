@@ -3,7 +3,7 @@
     /// <summary>
     /// Interface for a promise that can be rejected or resolved.
     /// </summary>
-    public interface IPendingPromise<PromisedT> : IRejectable
+    public interface IPendingPromise<TPromised> : IRejectable
     {
         /// <summary>
         /// ID of the promise, useful for debugging.
@@ -13,6 +13,6 @@
         /// <summary>
         /// Resolve the promise with a particular value.
         /// </summary>
-        void Resolve(PromisedT value);
+        void Resolve(TPromised value);
     }
 }

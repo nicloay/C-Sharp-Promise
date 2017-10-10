@@ -1,4 +1,4 @@
-﻿namespace RSG
+﻿namespace RSG.Promises
 {
     /// <summary>
     /// Specifies the state of a promise.
