@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using RSG.Promises.Generic;
 
 //
 // This example downloads search results from google then transforms the result to extract links.
