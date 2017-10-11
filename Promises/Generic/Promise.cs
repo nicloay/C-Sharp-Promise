@@ -90,7 +90,7 @@ namespace RSG.Promises.Generic
         /// <summary>
         /// Add a rejection handler for this promise.
         /// </summary>
-        private void AddRejectHandler(Reject onRejected, IRejectable rejectable)
+        private void AddRejectHandler(ActionReject onRejected, IRejectable rejectable)
         {
             if (rejectHandlers == null)
             {
@@ -137,7 +137,7 @@ namespace RSG.Promises.Generic
         /// <summary>
         /// Invoke a Reject single handler.
         /// </summary>
-        private void InvokeRejectHandler(Reject callback, IRejectable rejectable, Exception exception)
+        private void InvokeRejectHandler(ActionReject callback, IRejectable rejectable, Exception exception)
         {
             try
             {
@@ -291,7 +291,7 @@ namespace RSG.Promises.Generic
                 resultPromise.Resolve(v);
             };
 
-            Reject rejectHandler = ex =>
+            ActionReject rejectHandler = ex =>
             {
                 onRejected(ex);
 
@@ -350,7 +350,7 @@ namespace RSG.Promises.Generic
                     );
             };
 
-            Reject rejectHandler = ex =>
+            ActionReject rejectHandler = ex =>
             {
                 if (onRejected != null)
                 {
@@ -390,7 +390,7 @@ namespace RSG.Promises.Generic
                 }
             };
 
-            Reject rejectHandler = ex =>
+            ActionReject rejectHandler = ex =>
             {
                 if (onRejected != null)
                 {
@@ -423,7 +423,7 @@ namespace RSG.Promises.Generic
                 resultPromise.Resolve(v);
             };
 
-            Reject rejectHandler = ex =>
+            ActionReject rejectHandler = ex =>
             {
                 if (onRejected != null)
                 {
@@ -462,7 +462,7 @@ namespace RSG.Promises.Generic
         /// <summary>
         /// Helper function to invoke or register resolve/reject handlers.
         /// </summary>
-        private void ActionHandlers(IRejectable resultPromise, Action<T> resolveHandler, Reject rejectHandler)
+        private void ActionHandlers(IRejectable resultPromise, Action<T> resolveHandler, ActionReject rejectHandler)
         {
             if (CurState == PromiseState.Resolved)
             {

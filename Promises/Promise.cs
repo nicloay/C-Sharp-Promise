@@ -106,7 +106,7 @@ namespace RSG.Promises
         }
         
             
-        public Promise(Action<Resolve, Reject> resolver)
+        public Promise(Action<Resolve, ActionReject> resolver)
         {
             this.CurState = PromiseState.Pending;
             this.Id = NextId();
@@ -142,7 +142,7 @@ namespace RSG.Promises
         /// <summary>
         /// Add a rejection handler for this promise.
         /// </summary>
-        private void AddRejectHandler(Reject onRejected, IRejectable rejectable)
+        private void AddRejectHandler(ActionReject onRejected, IRejectable rejectable)
         {
             if (rejectHandlers == null)
             {
@@ -176,7 +176,7 @@ namespace RSG.Promises
         /// <summary>
         /// Invoke a single error handler.
         /// </summary>
-        private void InvokeRejectHandler(Reject callback, IRejectable rejectable, Exception value)
+        private void InvokeRejectHandler(ActionReject callback, IRejectable rejectable, Exception value)
         {
             try
             {
@@ -340,7 +340,7 @@ namespace RSG.Promises
                 resultPromise.Resolve();
             };
 
-            Reject rejectHandler = ex =>
+            ActionReject rejectHandler = ex =>
             {
                 onRejected(ex);
 
@@ -400,7 +400,7 @@ namespace RSG.Promises
                     );
             };
 
-            Reject rejectHandler = ex =>
+            ActionReject rejectHandler = ex =>
             {
                 if (onRejected != null)
                 {
@@ -440,7 +440,7 @@ namespace RSG.Promises
                 }
             };
 
-            Reject rejectHandler = ex =>
+            ActionReject rejectHandler = ex =>
             {
                 if (onRejected != null)
                 {
@@ -473,7 +473,7 @@ namespace RSG.Promises
                 resultPromise.Resolve();
             };
 
-            Reject rejectHandler = ex =>
+            ActionReject rejectHandler = ex =>
             {
                 if (onRejected != null)
                 {
@@ -491,7 +491,7 @@ namespace RSG.Promises
         /// <summary>
         /// Helper function to invoke or register resolve/reject handlers.
         /// </summary>
-        private void ActionHandlers(IRejectable resultPromise, Action resolveHandler, Reject rejectHandler)
+        private void ActionHandlers(IRejectable resultPromise, Action resolveHandler, ActionReject rejectHandler)
         {
             if (CurState == PromiseState.Resolved)
             {
