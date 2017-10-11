@@ -330,7 +330,6 @@ namespace RSG.Promises
         /// </summary>
         public IPromise Catch(Action<Exception> onRejected)
         {
-//            Argument.NotNull(() => onRejected);
 
             var resultPromise = new Promise();
             resultPromise.WithName(Name);
@@ -385,7 +384,6 @@ namespace RSG.Promises
         {
             // This version of the function must supply an onResolved.
             // Otherwise there is now way to get the converted value to pass to the resulting promise.
-//            Argument.NotNull(() => onResolved);
 
             var resultPromise = new Promise<ConvertedT>();
             resultPromise.WithName(Name);
