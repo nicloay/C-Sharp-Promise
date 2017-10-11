@@ -12,7 +12,7 @@ namespace RSG.Promises.Generic
     /// Implements a C# promise.
     /// https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
     /// </summary>
-    public class Promise<T> : IPromise<T>, IPendingPromise<T>, IPromiseInfo
+    public class Promise<T> : IPromise<T>, IPendingPromise<T>, IPromiseInfo, ICancelable
     {
         /// <summary>
         /// The exception when the promise is rejected.
@@ -36,6 +36,11 @@ namespace RSG.Promises.Generic
         private List<IRejectable> resolveRejectables;
 
         /// <summary>
+        /// handlerr called by Cancel method
+        /// </summary>
+        private ActionCancel cancelHandler;
+        
+        /// <summary>
         /// ID of the promise, useful for debugging.
         /// </summary>
         public int Id { get; }
@@ -50,22 +55,23 @@ namespace RSG.Promises.Generic
         /// </summary>
         public PromiseState CurState { get; private set; }
 
-        public Promise()
+        public Promise(ActionCancel cancelHandler= null)
         {
             this.CurState = PromiseState.Pending;
             this.Id = Promise.NextId();
-
+            this.cancelHandler = cancelHandler;
+            
             if (Promise.EnablePromiseTracking)
             {
                 Promise.pendingPromises.Add(this);
             }
         }
 
-        public Promise(Action<Action<T>, Action<Exception>> resolver)
+        public Promise(Action<Action<T>, Action<Exception>> resolver, ActionCancel cancelHandler = null)
         {
             this.CurState = PromiseState.Pending;
             this.Id = Promise.NextId();
-
+            this.cancelHandler = cancelHandler;
             if (Promise.EnablePromiseTracking)
             {
                 Promise.pendingPromises.Add(this);
@@ -160,6 +166,7 @@ namespace RSG.Promises.Generic
             rejectHandlers = null;
             resolveCallbacks = null;
             resolveRejectables = null;
+            cancelHandler = null;
         }
 
         /// <summary>
@@ -589,7 +596,7 @@ namespace RSG.Promises.Generic
         /// Returns a promise that resolves when the first of the promises in the enumerable argument have resolved.
         /// Returns the value from the first promise that has resolved.
         /// </summary>
-        public static IPromise<T> Race(IEnumerable<IPromise<T>> promises)
+        public static IPromise<T> Race(IEnumerable<IPromise<T>> promises, bool cancelRemaining = false)
         {
             var promisesArray = promises.ToArray();
             if (promisesArray.Length == 0)
@@ -614,7 +621,14 @@ namespace RSG.Promises.Generic
                     .Then(result =>
                     {
                         if (resultPromise.CurState == PromiseState.Pending)
-                        {
+                        {                            
+                            foreach (var promise1 in promisesArray)
+                            {
+                                if (promise1 != resultPromise && promise1 is ICancelable)
+                                {
+                                    (promise1 as ICancelable).Cancel();
+                                }
+                            }
                             resultPromise.Resolve(result);
                         }
                     })
@@ -675,6 +689,20 @@ namespace RSG.Promises.Generic
             this.Catch((e) => { promise.Resolve(); });
 
             return promise.Then(onComplete);
+        }
+
+        public void Cancel()
+        {
+            if (cancelHandler != null)
+            {
+                cancelHandler();
+            }
+            ClearHandlers();
+        }
+
+        public void AddOnCancel(ActionCancel cancelHandler)
+        {
+            this.cancelHandler = cancelHandler;
         }
     }
 }

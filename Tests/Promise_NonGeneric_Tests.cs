@@ -3,6 +3,7 @@ using RSG.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using RSG.Promises.Generic;
 using Xunit;
 
@@ -1214,64 +1215,26 @@ namespace RSG.Tests
             Assert.Equal(2, callback);
         }
 
-        [Fact]
-        public void cancel_promise_in_race_1()
-        {
-            var promise = new Promise();
-            value = 0;
-            var p1 = GetPromise();
-            
-            p1.Then(GetPromise).Then(GetPromise);
-            Assert.Equal(3, value);
-        }    
-
-        [Fact]
-        public void cancel_promise_in_race_2()
-        {
-            var promise = new Promise<IEnumerable<IPromise>>();
-            value = 0;
-            
-            
-            promise.ThenAll(null).Then(null);
-            IEnumerable<IPromise> list = new List<IPromise>() { GetPromise(), GetPromise(), GetPromise()};
-            promise.Resolve(list);
-            Assert.Equal(3, value);
-        }  
+       
         
-        [Fact(Skip = "skip")]
+        [Fact] 
         public void cancel_promise_in_race_3()
         {
-            int value = 0;
+            int globalValue = 0;
             var p1 = new Promise((resolve, reject) =>
             {
-                value++;
-                resolve();
+                Thread.Sleep(200);
+                globalValue++;
             });
+            var p2 = new Promise().Then(() => globalValue++);
             
-            var p2 = new Promise((resolve, reject) =>
-            {
-                value++;
-                resolve();
-            });
 
-
+            Assert.Equal(0, globalValue);
             Promise.Race(p1, p2).Done();
+            
                      
-            Assert.Equal(1, value);
+            Assert.Equal(1, globalValue);
         } 
-        
-        
-        
-        private int value = 0;
-        private IPromise GetPromise()
-        {          
-            var promise = new Promise((resolve, reject) =>
-            {
-                value++;
-                resolve();
-            });
-            return promise;
-        }
         
         
     }
