@@ -3,7 +3,7 @@
 namespace RSG.Promises
 {
     
-    public delegate void Reject(Exception exception);
+    public delegate void ActionReject(Exception exception);
     
     /// <summary>
     /// Represents a handler invoked when the promise is rejected.
@@ -13,7 +13,7 @@ namespace RSG.Promises
         /// <summary>
         /// Callback fn.
         /// </summary>
-        public Reject callback;
+        public ActionReject callback;
 
         /// <summary>
         /// The promise that is rejected when there is an error while invoking the handler.

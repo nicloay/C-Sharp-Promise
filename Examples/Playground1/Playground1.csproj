@@ -4,18 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7E1C6A8A-84E7-43C3-AE73-C6E8A9F11AF3}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{5DAC936D-5C0F-43B6-8F23-3F9A88C76BAA}</ProjectGuid>
+    <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RSG</RootNamespace>
-    <AssemblyName>RSG.Promise</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <RootNamespace>Playground1</RootNamespace>
+    <AssemblyName>Playground1</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">.\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,16 +22,15 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -43,27 +41,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Promises\Generic\IPendingPromise.cs" />
-    <Compile Include="Promises\Generic\IPromise.cs" />
-    <Compile Include="Promises\ICancelable.cs" />
-    <Compile Include="Promises\IRejectable.cs" />
-    <Compile Include="Promises\PromiseState.cs" />
-    <Compile Include="Promises\Utils\EnumerableExt.cs" />
-    <Compile Include="Promises\Utils\PromiseHelpers.cs" />
-    <Compile Include="Promises\ExceptionEventArgs.cs" />
-    <Compile Include="Promises\Generic\Promise.cs" />
-    <Compile Include="Promises\IPendingPromise.cs" />
-    <Compile Include="Promises\IPromise.cs" />
-    <Compile Include="Promises\IPromiseInfo.cs" />
-    <Compile Include="Promises\Promise.cs" />
-    <Compile Include="Promises\RejectHandler.cs" />
-    <Compile Include="Promises\Utils\PromiseTimer.cs" />
-    <Compile Include="Promises\Utils\Tuple.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include=".travis.yml" />
-    <None Include="README.md" />
+    <ProjectReference Include="..\..\C-Sharp-Promise.csproj">
+      <Project>{7e1c6a8a-84e7-43c3-ae73-c6e8a9f11af3}</Project>
+      <Name>C-Sharp-Promise</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
