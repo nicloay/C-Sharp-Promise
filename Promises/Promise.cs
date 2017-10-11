@@ -7,6 +7,7 @@ using RSG.Promises.Generic;
 
 namespace RSG.Promises
 {
+      
     /// <summary>
     /// Implements a non-generic C# promise, this is a promise that simply resolves without delivering a value.
     /// https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
@@ -103,8 +104,9 @@ namespace RSG.Promises
                 pendingPromises.Add(this);
             }
         }
-
-        public Promise(Action<Action, Action<Exception>> resolver)
+        
+            
+        public Promise(Action<Resolve, Reject> resolver)
         {
             this.CurState = PromiseState.Pending;
             this.Id = NextId();
@@ -140,7 +142,7 @@ namespace RSG.Promises
         /// <summary>
         /// Add a rejection handler for this promise.
         /// </summary>
-        private void AddRejectHandler(Action<Exception> onRejected, IRejectable rejectable)
+        private void AddRejectHandler(Reject onRejected, IRejectable rejectable)
         {
             if (rejectHandlers == null)
             {
@@ -174,11 +176,8 @@ namespace RSG.Promises
         /// <summary>
         /// Invoke a single error handler.
         /// </summary>
-        private void InvokeRejectHandler(Action<Exception> callback, IRejectable rejectable, Exception value)
+        private void InvokeRejectHandler(Reject callback, IRejectable rejectable, Exception value)
         {
-//            Argument.NotNull(() => callback);
-//            Argument.NotNull(() => rejectable);
-
             try
             {
                 callback(value);
@@ -194,9 +193,6 @@ namespace RSG.Promises
         /// </summary>
         private void InvokeResolveHandler(Action callback, IRejectable rejectable)
         {
-//            Argument.NotNull(() => callback);
-//            Argument.NotNull(() => rejectable);
-
             try
             {
                 callback();
@@ -221,8 +217,6 @@ namespace RSG.Promises
         /// </summary>
         private void InvokeRejectHandlers(Exception ex)
         {
-//            Argument.NotNull(() => ex);
-
             if (rejectHandlers != null)
             {
                 rejectHandlers.Each(handler => InvokeRejectHandler(handler.callback, handler.rejectable, ex));
@@ -249,8 +243,6 @@ namespace RSG.Promises
         /// </summary>
         public void Reject(Exception ex)
         {
-//            Argument.NotNull(() => ex);
-
             if (CurState != PromiseState.Pending)
             {
                 throw new ApplicationException("Attempt to reject a promise that is already in state: " + CurState + ", a promise can only be rejected when it is still in state: " + PromiseState.Pending);
@@ -348,7 +340,7 @@ namespace RSG.Promises
                 resultPromise.Resolve();
             };
 
-            Action<Exception> rejectHandler = ex =>
+            Reject rejectHandler = ex =>
             {
                 onRejected(ex);
 
@@ -408,7 +400,7 @@ namespace RSG.Promises
                     );
             };
 
-            Action<Exception> rejectHandler = ex =>
+            Reject rejectHandler = ex =>
             {
                 if (onRejected != null)
                 {
@@ -448,7 +440,7 @@ namespace RSG.Promises
                 }
             };
 
-            Action<Exception> rejectHandler = ex =>
+            Reject rejectHandler = ex =>
             {
                 if (onRejected != null)
                 {
@@ -481,7 +473,7 @@ namespace RSG.Promises
                 resultPromise.Resolve();
             };
 
-            Action<Exception> rejectHandler = ex =>
+            Reject rejectHandler = ex =>
             {
                 if (onRejected != null)
                 {
@@ -499,7 +491,7 @@ namespace RSG.Promises
         /// <summary>
         /// Helper function to invoke or register resolve/reject handlers.
         /// </summary>
-        private void ActionHandlers(IRejectable resultPromise, Action resolveHandler, Action<Exception> rejectHandler)
+        private void ActionHandlers(IRejectable resultPromise, Action resolveHandler, Reject rejectHandler)
         {
             if (CurState == PromiseState.Resolved)
             {
@@ -705,8 +697,6 @@ namespace RSG.Promises
         /// </summary>
         public static IPromise Rejected(Exception ex)
         {
-//            Argument.NotNull(() => ex);
-
             var promise = new Promise();
             promise.Reject(ex);
             return promise;

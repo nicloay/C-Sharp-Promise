@@ -1,5 +1,7 @@
 ﻿namespace RSG.Promises
 {
+    public delegate void Resolve();
+    
     /// <summary>
     /// Interface for a promise that can be rejected or resolved.
     /// </summary>
