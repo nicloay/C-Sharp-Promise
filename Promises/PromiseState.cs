@@ -7,6 +7,7 @@
     {
         Pending,    // The promise is in-flight.
         Rejected,   // The promise has been rejected.
-        Resolved    // The promise has been resolved.
+        Resolved,    // The promise has been resolved.
+        Canceled    //The promise has been canceled.
     };
 }

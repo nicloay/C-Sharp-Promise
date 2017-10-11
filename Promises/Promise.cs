@@ -1,18 +1,19 @@
 ﻿using RSG.Promises;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using RSG.Promises.Generic;
 
 namespace RSG.Promises
 {
-      
+    
     /// <summary>
     /// Implements a non-generic C# promise, this is a promise that simply resolves without delivering a value.
     /// https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
     /// </summary>
-    public class Promise : IPromise, IPendingPromise, IPromiseInfo
+    public class Promise : IPromise, IPendingPromise, IPromiseInfo, ICancelable
     {
         /// <summary>
         /// Set to true to enable tracking of promises.
@@ -67,7 +68,7 @@ namespace RSG.Promises
             /// <summary>
             /// Callback fn.
             /// </summary>
-            public Action callback;
+            public ActionResolve callback;
 
             /// <summary>
             /// The promise that is rejected when there is an error while invoking the handler.
@@ -80,6 +81,9 @@ namespace RSG.Promises
         /// </summary>
         private List<ResolveHandler> resolveHandlers;
 
+
+        private ActionCancel cancelHandler;
+        
         /// <summary>
         /// ID of the promise, useful for debugging.
         /// </summary>
@@ -95,10 +99,11 @@ namespace RSG.Promises
         /// </summary>
         public PromiseState CurState { get; private set; }
 
-        public Promise()
+        public Promise(ActionCancel cancelHandler = null)
         {
             this.CurState = PromiseState.Pending;
             this.Id = NextId();
+            this.cancelHandler = cancelHandler;
             if (EnablePromiseTracking)
             {
                 pendingPromises.Add(this);
@@ -106,10 +111,11 @@ namespace RSG.Promises
         }
         
             
-        public Promise(Action<Resolve, Reject> resolver)
+        public Promise(Action<ActionResolve, ActionReject> resolver, ActionCancel cancelHandler = null)
         {
             this.CurState = PromiseState.Pending;
             this.Id = NextId();
+            this.cancelHandler = cancelHandler;
             if (EnablePromiseTracking)
             {
                 pendingPromises.Add(this);
@@ -142,7 +148,7 @@ namespace RSG.Promises
         /// <summary>
         /// Add a rejection handler for this promise.
         /// </summary>
-        private void AddRejectHandler(Reject onRejected, IRejectable rejectable)
+        private void AddRejectHandler(ActionReject onRejected, IRejectable rejectable)
         {
             if (rejectHandlers == null)
             {
@@ -159,7 +165,7 @@ namespace RSG.Promises
         /// <summary>
         /// Add a resolve handler for this promise.
         /// </summary>
-        private void AddResolveHandler(Action onResolved, IRejectable rejectable)
+        private void AddResolveHandler(ActionResolve onResolved, IRejectable rejectable)
         {
             if (resolveHandlers == null)
             {
@@ -176,7 +182,7 @@ namespace RSG.Promises
         /// <summary>
         /// Invoke a single error handler.
         /// </summary>
-        private void InvokeRejectHandler(Reject callback, IRejectable rejectable, Exception value)
+        private void InvokeRejectHandler(ActionReject callback, IRejectable rejectable, Exception value)
         {
             try
             {
@@ -191,7 +197,7 @@ namespace RSG.Promises
         /// <summary>
         /// Invoke a single resolve handler.
         /// </summary>
-        private void InvokeResolveHandler(Action callback, IRejectable rejectable)
+        private void InvokeResolveHandler(ActionResolve callback, IRejectable rejectable)
         {
             try
             {
@@ -210,6 +216,7 @@ namespace RSG.Promises
         {
             rejectHandlers = null;
             resolveHandlers = null;
+            cancelHandler = null;
         }
 
         /// <summary>
@@ -330,17 +337,16 @@ namespace RSG.Promises
         /// </summary>
         public IPromise Catch(Action<Exception> onRejected)
         {
-//            Argument.NotNull(() => onRejected);
 
             var resultPromise = new Promise();
             resultPromise.WithName(Name);
 
-            Action resolveHandler = () =>
+            ActionResolve resolveHandler = () =>
             {
                 resultPromise.Resolve();
             };
 
-            Reject rejectHandler = ex =>
+            ActionReject rejectHandler = ex =>
             {
                 onRejected(ex);
 
@@ -385,12 +391,11 @@ namespace RSG.Promises
         {
             // This version of the function must supply an onResolved.
             // Otherwise there is now way to get the converted value to pass to the resulting promise.
-//            Argument.NotNull(() => onResolved);
 
             var resultPromise = new Promise<ConvertedT>();
             resultPromise.WithName(Name);
 
-            Action resolveHandler = () =>
+            ActionResolve resolveHandler = () =>
             {
                 onResolved()
                     .Then(
@@ -400,7 +405,7 @@ namespace RSG.Promises
                     );
             };
 
-            Reject rejectHandler = ex =>
+            ActionReject rejectHandler = ex =>
             {
                 if (onRejected != null)
                 {
@@ -424,7 +429,7 @@ namespace RSG.Promises
             var resultPromise = new Promise();
             resultPromise.WithName(Name);
 
-            Action resolveHandler = () =>
+            ActionResolve resolveHandler = () =>
             {
                 if (onResolved != null)
                 {
@@ -440,7 +445,7 @@ namespace RSG.Promises
                 }
             };
 
-            Reject rejectHandler = ex =>
+            ActionReject rejectHandler = ex =>
             {
                 if (onRejected != null)
                 {
@@ -463,7 +468,7 @@ namespace RSG.Promises
             var resultPromise = new Promise();
             resultPromise.WithName(Name);
 
-            Action resolveHandler = () =>
+            ActionResolve resolveHandler = () =>
             {
                 if (onResolved != null)
                 {
@@ -473,7 +478,7 @@ namespace RSG.Promises
                 resultPromise.Resolve();
             };
 
-            Reject rejectHandler = ex =>
+            ActionReject rejectHandler = ex =>
             {
                 if (onRejected != null)
                 {
@@ -491,7 +496,7 @@ namespace RSG.Promises
         /// <summary>
         /// Helper function to invoke or register resolve/reject handlers.
         /// </summary>
-        private void ActionHandlers(IRejectable resultPromise, Action resolveHandler, Reject rejectHandler)
+        private void ActionHandlers(IRejectable resultPromise, ActionResolve resolveHandler, ActionReject rejectHandler)
         {
             if (CurState == PromiseState.Resolved)
             {
@@ -634,6 +639,7 @@ namespace RSG.Promises
             return Then(() => Promise<ConvertedT>.Race(chain()));
         }
 
+        
         /// <summary>
         /// Returns a promise that resolves when the first of the promises in the enumerable argument have resolved.
         /// Returns the value from the first promise that has resolved.
@@ -642,7 +648,7 @@ namespace RSG.Promises
         {
             return Race((IEnumerable<IPromise>)promises); // Cast is required to force use of the other function.
         }
-
+        
         /// <summary>
         /// Returns a promise that resolves when the first of the promises in the enumerable argument have resolved.
         /// Returns the value from the first promise that has resolved.
@@ -672,7 +678,14 @@ namespace RSG.Promises
                     .Then(() =>
                     {
                         if (resultPromise.CurState == PromiseState.Pending)
-                        {
+                        {                                                            
+                            foreach (var promise1 in promisesArray)
+                            {
+                                if (promise1 != promise && promise1 is ICancelable)
+                                {
+                                    (promise1 as ICancelable).Cancel();
+                                }
+                            }                            
                             resultPromise.Resolve();
                         }
                     })
@@ -744,6 +757,26 @@ namespace RSG.Promises
             {
                 unhandlerException(sender, new ExceptionEventArgs(ex));
             }
+        }
+
+        
+        /// <summary>
+        /// Cancel current promise so no any events (Resolve or Reject will be fired)
+        /// </summary>
+        /// <exception cref="NotImplementedException"></exception>
+        public void Cancel()
+        {
+            CurState = PromiseState.Canceled;
+            if (this.cancelHandler != null)
+            {
+                this.cancelHandler();
+            }
+            ClearHandlers();
+        }
+
+        public void AddOnCancel(ActionCancel cancelHandler)
+        {
+            this.cancelHandler = cancelHandler;
         }
     }
 }
