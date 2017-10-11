@@ -1,11 +1,10 @@
-﻿using RSG;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using RSG.Promises.Generic;
 
 //
 // This example downloads search results from google, extracts the links, follows all (absolute) links and combines all async operations in a single operation using the All function.
