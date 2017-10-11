@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
-using RSG.Promises.Generic;
 
 //
 // Example of a promise that is rejected because of an error during the async operation.
