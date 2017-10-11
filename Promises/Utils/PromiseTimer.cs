@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using RSG.Promises;
 
-namespace RSG
+namespace RSG.Promises.Utils
 {
 
     public class PromiseCancelledException : Exception

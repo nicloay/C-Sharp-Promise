@@ -43,14 +43,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EnumerableExt.cs" />
-    <Compile Include="PromiseHelpers.cs" />
     <Compile Include="Promises\Generic\IPendingPromise.cs" />
     <Compile Include="Promises\Generic\IPromise.cs" />
     <Compile Include="Promises\ICancelable.cs" />
     <Compile Include="Promises\IRejectable.cs" />
     <Compile Include="Promises\PromiseState.cs" />
-    <Compile Include="PromiseTimer.cs" />
+    <Compile Include="Promises\Utils\EnumerableExt.cs" />
+    <Compile Include="Promises\Utils\PromiseHelpers.cs" />
     <Compile Include="Promises\ExceptionEventArgs.cs" />
     <Compile Include="Promises\Generic\Promise.cs" />
     <Compile Include="Promises\IPendingPromise.cs" />
@@ -58,8 +57,9 @@
     <Compile Include="Promises\IPromiseInfo.cs" />
     <Compile Include="Promises\Promise.cs" />
     <Compile Include="Promises\RejectHandler.cs" />
+    <Compile Include="Promises\Utils\PromiseTimer.cs" />
+    <Compile Include="Promises\Utils\Tuple.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tuple.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".travis.yml" />
