@@ -1238,7 +1238,7 @@ namespace RSG.Tests
             Assert.Equal(3, value);
         }  
         
-        [Fact]
+        [Fact(Skip = "skip")]
         public void cancel_promise_in_race_3()
         {
             int value = 0;

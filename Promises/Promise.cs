@@ -67,7 +67,7 @@ namespace RSG.Promises
             /// <summary>
             /// Callback fn.
             /// </summary>
-            public Action callback;
+            public ActionResolve callback;
 
             /// <summary>
             /// The promise that is rejected when there is an error while invoking the handler.
@@ -106,7 +106,7 @@ namespace RSG.Promises
         }
         
             
-        public Promise(Action<Resolve, ActionReject> resolver)
+        public Promise(Action<ActionResolve, ActionReject> resolver)
         {
             this.CurState = PromiseState.Pending;
             this.Id = NextId();
@@ -159,7 +159,7 @@ namespace RSG.Promises
         /// <summary>
         /// Add a resolve handler for this promise.
         /// </summary>
-        private void AddResolveHandler(Action onResolved, IRejectable rejectable)
+        private void AddResolveHandler(ActionResolve onResolved, IRejectable rejectable)
         {
             if (resolveHandlers == null)
             {
@@ -191,7 +191,7 @@ namespace RSG.Promises
         /// <summary>
         /// Invoke a single resolve handler.
         /// </summary>
-        private void InvokeResolveHandler(Action callback, IRejectable rejectable)
+        private void InvokeResolveHandler(ActionResolve callback, IRejectable rejectable)
         {
             try
             {
@@ -335,7 +335,7 @@ namespace RSG.Promises
             var resultPromise = new Promise();
             resultPromise.WithName(Name);
 
-            Action resolveHandler = () =>
+            ActionResolve resolveHandler = () =>
             {
                 resultPromise.Resolve();
             };
@@ -390,7 +390,7 @@ namespace RSG.Promises
             var resultPromise = new Promise<ConvertedT>();
             resultPromise.WithName(Name);
 
-            Action resolveHandler = () =>
+            ActionResolve resolveHandler = () =>
             {
                 onResolved()
                     .Then(
@@ -424,7 +424,7 @@ namespace RSG.Promises
             var resultPromise = new Promise();
             resultPromise.WithName(Name);
 
-            Action resolveHandler = () =>
+            ActionResolve resolveHandler = () =>
             {
                 if (onResolved != null)
                 {
@@ -463,7 +463,7 @@ namespace RSG.Promises
             var resultPromise = new Promise();
             resultPromise.WithName(Name);
 
-            Action resolveHandler = () =>
+            ActionResolve resolveHandler = () =>
             {
                 if (onResolved != null)
                 {
@@ -491,7 +491,7 @@ namespace RSG.Promises
         /// <summary>
         /// Helper function to invoke or register resolve/reject handlers.
         /// </summary>
-        private void ActionHandlers(IRejectable resultPromise, Action resolveHandler, ActionReject rejectHandler)
+        private void ActionHandlers(IRejectable resultPromise, ActionResolve resolveHandler, ActionReject rejectHandler)
         {
             if (CurState == PromiseState.Resolved)
             {
