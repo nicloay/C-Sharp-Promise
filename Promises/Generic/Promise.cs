@@ -596,7 +596,7 @@ namespace RSG.Promises.Generic
         /// Returns a promise that resolves when the first of the promises in the enumerable argument have resolved.
         /// Returns the value from the first promise that has resolved.
         /// </summary>
-        public static IPromise<T> Race(IEnumerable<IPromise<T>> promises, bool cancelRemaining = false)
+        public static IPromise<T> Race(IEnumerable<IPromise<T>> promises)
         {
             var promisesArray = promises.ToArray();
             if (promisesArray.Length == 0)
